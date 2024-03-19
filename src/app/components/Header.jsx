@@ -4,7 +4,8 @@ import { ConnectButton } from "web3uikit";
 const Header = () => {
   return (
     <div>
-      <ConnectButton />
+      <h1>Welcome to Decentralized lottery!</h1>
+      <ConnectButton moralisAuth={false} />
     </div>
   );
 };
