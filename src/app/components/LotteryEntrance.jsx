@@ -9,18 +9,22 @@ const LotteryEntrance = () => {
   const raffleAddress =
     chainId in contractAddresses ? contractAddresses[chainId][0] : null;
 
-  const [entranceFee, setEntranceFee] = useState("0");
+  const [entranceFee, setEntranceFee] = useState(10000000000000000);
   const [numberOfPlayers, setNumberOfPlayers] = useState("0");
   const [recentWinner, setRecentWinner] = useState("0");
 
   const dispatch = useNotification();
 
-  const { runContractFunction: enterRaffle } = useWeb3Contract({
+  const {
+    runContractFunction: enterRaffle,
+    isLoading,
+    isFetching,
+  } = useWeb3Contract({
     abi: abi,
     contractAddress: raffleAddress,
     functionName: "enterRaffle",
     params: {},
-    msgValue: BigInt(parseInt(entranceFee)),
+    msgValue: entranceFee,
   });
 
   const { runContractFunction: getEntranceFee } = useWeb3Contract({
@@ -48,7 +52,7 @@ const LotteryEntrance = () => {
     const entranceFeeFromCall = (await getEntranceFee()).toString();
     const numPlayersFromCall = (await getPlayersNumber()).toString();
     const recentWinnerFromCall = await getRecentWinner();
-    setEntranceFee(entranceFeeFromCall / 1e18);
+    setEntranceFee(entranceFeeFromCall);
     setNumberOfPlayers(numPlayersFromCall);
     setRecentWinner(recentWinnerFromCall);
   }
@@ -88,10 +92,15 @@ const LotteryEntrance = () => {
                 onError: (e) => console.log(e),
               });
             }}
+            disabled={isLoading || isFetching}
           >
-            Enter Raffle
+            {isLoading || isFetching ? (
+              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+            ) : (
+              "Enter Raffle"
+            )}
           </button>
-          <div>{`Entrance Fee: ${entranceFee} ETH`}</div>
+          <div>{`Entrance Fee: ${entranceFee / 1e18} ETH`}</div>
           <div>The current number of players is: {numberOfPlayers}</div>
           <div>The most previous winner was: {recentWinner}</div>
         </>
