@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/LotteryEntrance": ["./src/app/components/LotteryEntrance.js"]
     }
   }
 }
