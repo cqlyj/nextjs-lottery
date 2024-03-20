@@ -10,6 +10,8 @@ const LotteryEntrance = () => {
     chainId in contractAddresses ? contractAddresses[chainId][0] : null;
 
   const [entranceFee, setEntranceFee] = useState("0");
+  const [numberOfPlayers, setNumberOfPlayers] = useState("0");
+  const [recentWinner, setRecentWinner] = useState("0");
 
   const dispatch = useNotification();
 
@@ -28,12 +30,31 @@ const LotteryEntrance = () => {
     params: {},
   });
 
+  const { runContractFunction: getPlayersNumber } = useWeb3Contract({
+    abi: abi,
+    contractAddress: raffleAddress,
+    functionName: "getNumberOfPlayers",
+    params: {},
+  });
+
+  const { runContractFunction: getRecentWinner } = useWeb3Contract({
+    abi: abi,
+    contractAddress: raffleAddress,
+    functionName: "getRecentWinner",
+    params: {},
+  });
+
+  async function updateUI() {
+    const entranceFeeFromCall = (await getEntranceFee()).toString();
+    const numPlayersFromCall = (await getPlayersNumber()).toString();
+    const recentWinnerFromCall = await getRecentWinner();
+    setEntranceFee(entranceFeeFromCall / 1e18);
+    setNumberOfPlayers(numPlayersFromCall);
+    setRecentWinner(recentWinnerFromCall);
+  }
+
   useEffect(() => {
     if (isWeb3Enabled) {
-      async function updateUI() {
-        const entranceFeeFromCall = (await getEntranceFee()).toString();
-        setEntranceFee(entranceFeeFromCall / 1e18);
-      }
       updateUI();
     }
   }, [isWeb3Enabled]);
@@ -54,11 +75,13 @@ const LotteryEntrance = () => {
   };
 
   return (
-    <div>
-      hello from enterRaffle!
+    <div className="p-5">
+      <h1 className="py-4 px-4 font-bold text-3xl">Raffle</h1>
+
       {raffleAddress ? (
         <>
           <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
             onClick={async () => {
               await enterRaffle({
                 onSuccess: handleSuccess,
@@ -69,6 +92,8 @@ const LotteryEntrance = () => {
             Enter Raffle
           </button>
           <div>{`Entrance Fee: ${entranceFee} ETH`}</div>
+          <div>The current number of players is: {numberOfPlayers}</div>
+          <div>The most previous winner was: {recentWinner}</div>
         </>
       ) : (
         <div>Connect to a supported network</div>
